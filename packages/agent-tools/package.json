@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tsx --test test/policy-search.test.ts test/credit-tools.test.ts test/tool-executor.test.ts test/relationship-review.test.ts test/agent-loop.test.ts",
+    "test": "tsx --test test/policy-search.test.ts test/credit-tools.test.ts test/tool-executor.test.ts test/relationship-review.test.ts test/agent-loop.test.ts test/bedrock-agent-model.test.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit"
   },
@@ -19,6 +19,7 @@
   "types": "dist/index.d.ts",
   "exports": "./dist/index.js",
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1144.0",
     "@creditops/domain": "*"
   }
 }
