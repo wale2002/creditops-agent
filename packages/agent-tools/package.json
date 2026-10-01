@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tsx --test test/policy-search.test.ts test/credit-tools.test.ts test/tool-executor.test.ts test/relationship-review.test.ts",
+    "test": "tsx --test test/policy-search.test.ts test/credit-tools.test.ts test/tool-executor.test.ts test/relationship-review.test.ts test/agent-loop.test.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit"
   },
