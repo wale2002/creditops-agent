@@ -4,13 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node scripts/run-workspace-tasks.mjs test",
+    "eval:policy": "node scripts/run-workspace-tasks.mjs eval:policy",
+    "build": "node scripts/run-workspace-tasks.mjs build",
+    "lint": "node scripts/run-workspace-tasks.mjs lint",
+    "ci": "node scripts/run-workspace-tasks.mjs ci"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "private": true,
+  "engines": {
+    "node": ">=22.14.0"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
