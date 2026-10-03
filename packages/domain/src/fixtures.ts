@@ -6,13 +6,13 @@ const dscrPolicy = {
 };
 
 const leveragePolicy = {
-  document: "Covenant Monitoring Policy",
-  section: "2.1 — Leverage Limits",
+  document: "Commercial Credit Policy",
+  section: "5.4 — Leverage Requirements",
 };
 
 const liquidityPolicy = {
-  document: "SME Lending Guidelines",
-  section: "4.2 — Minimum Liquidity",
+  document: "Commercial Credit Policy",
+  section: "5.5 — Liquidity Requirements",
 };
 
 export const borrowers: Borrower[] = [
