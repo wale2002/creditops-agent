@@ -1,0 +1,23 @@
+{
+  "name": "@creditops/mcp-server",
+  "version": "1.0.0",
+  "description": "Read-only Model Context Protocol server for CreditOps",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "tsx src/stdio.ts",
+    "test": "tsx --test test/mcp-server.test.ts"
+  },
+  "dependencies": {
+    "@creditops/agent-tools": "*",
+    "@modelcontextprotocol/server": "^2.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.3.0"
+  }
+}

@@ -17,6 +17,7 @@ CreditOps is an evidence-first commercial credit review prototype. It combines d
 - **Human-in-the-loop design:** the system may draft findings, but no tool exists for an AI model to approve credit, waive a covenant, or make a final lending decision.
 - **Evaluation-driven development:** a labelled RAG benchmark is enforced locally and in GitHub Actions alongside tests, builds, and linting.
 - **Optional cloud model integration:** an Amazon Bedrock adapter supports Nova Lite through a cost-safe runner that is dry-run by default.
+- **Standardized tool integration:** a local Model Context Protocol server exposes five read-only banking tools with schemas, RBAC, and linked audit events.
 
 ## Architecture
 
@@ -97,9 +98,11 @@ The current audit store is an append-only in-memory demonstration. A production 
 apps/web/                    Next.js dashboard and API routes
 packages/domain/             Financial models, calculations, covenants, fixtures
 packages/agent-tools/        RAG, tools, RBAC, audit, orchestration, agent loop
+packages/mcp-server/         Read-only MCP tools and stdio transport
 docs/policies/               Synthetic commercial credit policy corpus
 docs/rag-evaluation.md       Evaluation methodology and metrics
 docs/bedrock-local-demo.md   Optional Bedrock setup and cost-safety guide
+docs/mcp-server.md           MCP tools, security model, and client configuration
 .github/workflows/           Automated quality gates
 ```
 
@@ -137,7 +140,18 @@ Or run the same combined gate used by CI:
 npm run ci
 ```
 
-The current suite contains 40 automated tests across domain calculations, covenant handling, policy retrieval, safe refusals, evaluation metrics, credit tools, permissions, audit events, orchestration, the agent loop, and the Bedrock adapter.
+The current suite contains 46 automated tests across domain calculations, covenant handling, policy retrieval, safe refusals, evaluation metrics, credit tools, permissions, audit events, orchestration, the agent loop, the Bedrock adapter, and the MCP boundary.
+
+## Local MCP server
+
+CreditOps includes a stdio MCP server so compatible clients can discover and call controlled banking tools without receiving direct access to application internals. It exposes only read-oriented operations; there is no approve, update, delete, or covenant-waiver tool.
+
+```bash
+npm run build --workspace @creditops/mcp-server
+npm run start --workspace @creditops/mcp-server
+```
+
+The server runs locally, reads synthetic data, and makes no AWS request. See the [MCP server guide](docs/mcp-server.md) for its tools, client configuration, identity boundary, and audit behaviour.
 
 ## Optional Amazon Bedrock demo
 
