@@ -78,6 +78,33 @@ function expandQuery(query: string): string[] {
   return [...terms];
 }
 
+function countAdjacentPairMatches(
+  queryTokens: readonly string[],
+  candidateTokens: readonly string[],
+): number {
+  let matches = 0;
+
+  for (let queryIndex = 0; queryIndex < queryTokens.length - 1; queryIndex += 1) {
+    const left = queryTokens[queryIndex];
+    const right = queryTokens[queryIndex + 1];
+
+    if (!left || !right) {
+      continue;
+    }
+
+    const found = candidateTokens.some(
+      (token, candidateIndex) =>
+        token === left && candidateTokens[candidateIndex + 1] === right,
+    );
+
+    if (found) {
+      matches += 1;
+    }
+  }
+
+  return matches;
+}
+
 function createChunkId(documentId: string, section: string): string {
   const normalizedSection = section
     .toLowerCase()
@@ -145,6 +172,7 @@ export function searchCreditPolicy(
   limit = 3,
 ): PolicySearchResult[] {
   const queryTerms = expandQuery(query);
+  const queryTokens = tokenize(query);
 
   if (queryTerms.length === 0 || limit <= 0) {
     return [];
@@ -152,7 +180,8 @@ export function searchCreditPolicy(
 
   return chunks
     .map((chunk) => {
-      const sectionTerms = new Set(tokenize(chunk.section));
+      const sectionTokens = tokenize(chunk.section);
+      const sectionTerms = new Set(sectionTokens);
       const contentTerms = tokenize(chunk.content);
       const contentFrequency = new Map<string, number>();
 
@@ -173,6 +202,11 @@ export function searchCreditPolicy(
           score += Math.min(bodyMatches, 3);
         }
       }
+
+      const phraseMatches =
+        countAdjacentPairMatches(queryTokens, sectionTokens) +
+        countAdjacentPairMatches(queryTokens, contentTerms);
+      score += phraseMatches * 5;
 
       return {
         chunkId: chunk.id,

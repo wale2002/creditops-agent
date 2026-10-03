@@ -56,6 +56,18 @@ describe("policy ingestion and retrieval", () => {
     );
   });
 
+  it("ranks an exact liquidity phrase above generic policy language", () => {
+    const results = searchCreditPolicy(
+      "What minimum current ratio must a borrower maintain?",
+      chunks,
+    );
+
+    assert.equal(
+      results[0]?.citation.section,
+      "5.5 — Liquidity Requirements",
+    );
+  });
+
   it("returns no evidence for an unrelated question", () => {
     const results = searchCreditPolicy(
       "What is tomorrow's weather forecast?",

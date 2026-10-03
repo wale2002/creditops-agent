@@ -3,8 +3,10 @@ import { resolve } from "node:path";
 
 import {
   AuditedToolExecutor,
+  DEFAULT_POLICY_EVALUATION_CASES,
   answerPolicyQuestion,
   chunkPolicyDocument,
+  evaluatePolicyAssistant,
   orchestrateRelationshipReview,
 } from "@creditops/agent-tools";
 import { borrowers } from "@creditops/domain";
@@ -54,4 +56,11 @@ export function getRelationshipReview(borrowerId: string) {
 
 export function getPolicyAnswer(question: string) {
   return answerPolicyQuestion(question, policyChunks);
+}
+
+export function getPolicyEvaluation() {
+  return evaluatePolicyAssistant(
+    DEFAULT_POLICY_EVALUATION_CASES,
+    policyChunks,
+  );
 }

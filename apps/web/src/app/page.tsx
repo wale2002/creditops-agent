@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import {
   borrowerOptions,
+  getPolicyEvaluation,
   getRelationshipReview,
 } from "@/lib/review-data";
 import { PolicyAssistant } from "./policy-assistant";
@@ -59,6 +60,7 @@ export default async function Home({
     ? query.borrower!
     : borrowerOptions[0]!.id;
   const { review, auditEvents } = getRelationshipReview(selectedBorrower);
+  const policyEvaluation = getPolicyEvaluation();
   const borrower = borrowerOptions.find(
     (option) => option.id === selectedBorrower,
   )!;
@@ -229,6 +231,43 @@ export default async function Home({
           </div>
 
           <PolicyAssistant />
+
+          <article className="rounded-2xl border border-[#d8e5e1] bg-white p-5 shadow-[0_10px_26px_rgba(24,55,48,0.045)]">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-semibold tracking-[-0.02em]">RAG evaluation gate</h2>
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ring-1 ${policyEvaluation.passed ? "bg-[#e5f6ef] text-[#176b57] ring-[#b7dfd3]" : "bg-[#fff0e8] text-[#a94116] ring-[#f2c2ad]"}`}>
+                    {policyEvaluation.passed ? "PASS" : "FAIL"}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-[#7a8985]">
+                  {policyEvaluation.totalCases} labelled questions · Measured offline · Zero model calls
+                </p>
+              </div>
+              <code className="w-fit rounded-lg bg-[#f0f5f3] px-3 py-2 text-[10px] text-[#4f6862]">
+                npm run eval:policy
+              </code>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              {[
+                ["Status accuracy", policyEvaluation.metrics.statusAccuracy],
+                ["Retrieval hit rate", policyEvaluation.metrics.retrievalHitRate],
+                ["Top-1 accuracy", policyEvaluation.metrics.top1Accuracy],
+                ["Citation validity", policyEvaluation.metrics.citationValidity],
+                ["Safe refusals", policyEvaluation.metrics.safeRefusalAccuracy],
+              ].map(([label, value]) => (
+                <div key={String(label)} className="rounded-xl border border-[#e1e9e7] bg-[#fafcfb] px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#82918d]">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-xl font-semibold tracking-[-0.035em] text-[#176b57]">
+                    {(Number(value) * 100).toFixed(0)}%
+                  </p>
+                </div>
+              ))}
+            </div>
+          </article>
 
           <div className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
             <article className="rounded-2xl border border-[#dce6e3] bg-white shadow-[0_10px_26px_rgba(24,55,48,0.045)]">

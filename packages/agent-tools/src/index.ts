@@ -6,5 +6,6 @@ export * from "./bedrock-demo.js";
 export * from "./credit-tools.js";
 export * from "./policy-search.js";
 export * from "./policy-assistant.js";
+export * from "./policy-evaluation.js";
 export * from "./relationship-review.js";
 export * from "./tool-executor.js";
