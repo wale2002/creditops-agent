@@ -100,13 +100,37 @@ Options:
 Environment:
   AWS_REGION             AWS Region used for Bedrock
   BEDROCK_MODEL_ID       Enabled model or inference-profile ID
+  AWS_PROFILE            Optional named AWS profile for temporary credentials
   CREDITOPS_BORROWER_ID  Optional default borrower ID`);
 }
 
-function loadLocalEnvironment(): void {
-  const environmentPath = resolve(process.cwd(), ".env");
+export function resolveLocalEnvironmentPath(
+  currentWorkingDirectory: string,
+  moduleUrl: string,
+  fileExists: (path: string) => boolean = existsSync,
+): string | undefined {
+  const repositoryEnvironmentPath = fileURLToPath(
+    new URL("../../../.env", moduleUrl),
+  );
+  const workingDirectoryEnvironmentPath = resolve(
+    currentWorkingDirectory,
+    ".env",
+  );
+  const candidates = [
+    repositoryEnvironmentPath,
+    workingDirectoryEnvironmentPath,
+  ].filter((candidate, index, paths) => paths.indexOf(candidate) === index);
 
-  if (existsSync(environmentPath)) {
+  return candidates.find(fileExists);
+}
+
+function loadLocalEnvironment(): void {
+  const environmentPath = resolveLocalEnvironmentPath(
+    process.cwd(),
+    import.meta.url,
+  );
+
+  if (environmentPath) {
     loadEnvFile(environmentPath);
   }
 }
@@ -163,8 +187,18 @@ async function runLiveDemo(
     userRequest: [
       `Prepare a relationship review for borrower ${config.borrowerId}.`,
       "Use tools for borrower data, calculations, covenants, documents, and policy evidence.",
+      "Copy only exact policy document titles and section names returned by the policy-search tool.",
       "Clearly state that the output is a draft requiring human credit-officer review.",
     ].join(" "),
+    requiredSuccessfulTools: [
+      "getBorrowerProfile",
+      "getFacilities",
+      "getFinancialStatements",
+      "calculateFinancialRatios",
+      "testCovenants",
+      "identifyMissingDocuments",
+      "searchCreditPolicy",
+    ],
   });
 
   console.log("\nAgent response\n--------------");

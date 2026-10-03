@@ -92,6 +92,14 @@ describe("Bedrock agent model", () => {
       converted[2]?.content?.[1]?.toolResult?.toolUseId,
       "call-covenants",
     );
+    assert.deepEqual(
+      converted[2]?.content?.[0]?.toolResult?.content?.[0]?.json,
+      { result: { dscr: 1.18 } },
+    );
+    assert.deepEqual(
+      converted[2]?.content?.[1]?.toolResult?.content?.[0]?.json,
+      { result: [{ status: "BREACH" }] },
+    );
   });
 
   it("translates a Bedrock tool-use response into agent tool calls", async () => {
@@ -154,7 +162,11 @@ describe("Bedrock agent model", () => {
         message: {
           role: "assistant",
           content: [
-            { text: "Draft complete. Human approval is required." },
+            {
+              text:
+                "<thinking>Internal planning.</thinking>\n\n" +
+                "Draft complete. Human approval is required.",
+            },
           ],
         },
       },

@@ -41,6 +41,10 @@ function requireNonEmpty(value: string, field: string): string {
   return value;
 }
 
+function visibleModelText(value: string): string {
+  return value.replace(/<thinking>[\s\S]*?<\/thinking>\s*/giu, "").trim();
+}
+
 function asToolInput(value: unknown): Record<string, unknown> {
   if (
     typeof value !== "object" ||
@@ -114,6 +118,12 @@ function toBedrockDocument(
   }
 }
 
+function toBedrockToolResult(value: unknown): { result: JsonDocument } {
+  return {
+    result: toBedrockDocument(value === undefined ? null : value),
+  };
+}
+
 export function toBedrockMessages(
   messages: readonly AgentMessage[],
 ): Message[] {
@@ -174,11 +184,9 @@ export function toBedrockMessages(
           status: toolMessage.isError ? "error" : "success",
           content: [
             {
-              json: toBedrockDocument(
-                toolMessage.result === undefined
-                  ? null
-                  : toolMessage.result,
-              ),
+              // Bedrock Converse requires tool-result JSON content to be an
+              // object. Wrapping also preserves array and primitive results.
+              json: toBedrockToolResult(toolMessage.result),
             },
           ],
         },
@@ -276,6 +284,7 @@ export class BedrockAgentModel implements AgentModel {
       .flatMap((block) => (block.text === undefined ? [] : [block.text]))
       .join("\n")
       .trim();
+    const visibleText = visibleModelText(text);
 
     const toolCalls = content.flatMap((block) => {
       if (!block.toolUse) {
@@ -303,15 +312,15 @@ export class BedrockAgentModel implements AgentModel {
     if (toolCalls.length > 0) {
       return {
         kind: "tool_calls",
-        text,
+        text: visibleText,
         toolCalls,
       };
     }
 
-    if (text.length > 0) {
+    if (visibleText.length > 0) {
       return {
         kind: "final",
-        text,
+        text: visibleText,
       };
     }
 

@@ -165,6 +165,51 @@ describe("credit agent loop", () => {
     );
   });
 
+  it("requires configured tools to succeed before accepting a final answer", async () => {
+    const model = new ScriptedAgentModel([
+      {
+        kind: "final",
+        text: "Draft complete without a covenant test.",
+      },
+      {
+        kind: "tool_calls",
+        text: "I will run the required covenant test.",
+        toolCalls: [
+          {
+            id: "call-required-covenants",
+            name: "testCovenants",
+            input: { borrowerId: "atlas-manufacturing" },
+          },
+        ],
+      },
+      {
+        kind: "final",
+        text: "Draft complete after the required covenant test.",
+      },
+    ]);
+
+    const result = await runCreditAgent({
+      model,
+      executor: createExecutor(),
+      context,
+      userRequest: "Review Atlas Manufacturing.",
+      requiredSuccessfulTools: ["testCovenants", "testCovenants"],
+    });
+
+    assert.equal(result.modelTurns, 3);
+    assert.match(result.finalText, /after the required covenant test/i);
+    assert.deepEqual(
+      result.auditEvents.map((event) => event.toolName),
+      ["testCovenants"],
+    );
+    assert.match(
+      model.requests[1]?.messages.at(-1)?.role === "user"
+        ? model.requests[1]?.messages.at(-1)?.text ?? ""
+        : "",
+      /successfully call these required tools: testCovenants/i,
+    );
+  });
+
   it("returns a tool error to the model so it can recover", async () => {
     const model = new ScriptedAgentModel([
       {

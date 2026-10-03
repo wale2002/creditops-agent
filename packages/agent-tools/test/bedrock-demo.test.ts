@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
+import { resolve } from "node:path";
 import { describe, it } from "node:test";
+import { pathToFileURL } from "node:url";
 
 import {
   BedrockDemoConfigError,
   parseBedrockDemoConfig,
+  resolveLocalEnvironmentPath,
   validateLiveBedrockConfig,
 } from "../src/bedrock-demo.js";
 
@@ -51,5 +54,29 @@ describe("Bedrock demo configuration", () => {
       () => parseBedrockDemoConfig(["--spend-money"], {}),
       /Unknown command-line option/,
     );
+  });
+
+  it("loads the repository environment before a workspace-local copy", () => {
+    const repositoryRoot = resolve("fixture-repository");
+    const workspaceDirectory = resolve(
+      repositoryRoot,
+      "packages",
+      "agent-tools",
+    );
+    const moduleUrl = pathToFileURL(
+      resolve(workspaceDirectory, "src", "bedrock-demo.ts"),
+    ).href;
+    const repositoryEnvironmentPath = resolve(repositoryRoot, ".env");
+    const workspaceEnvironmentPath = resolve(workspaceDirectory, ".env");
+
+    const environmentPath = resolveLocalEnvironmentPath(
+      workspaceDirectory,
+      moduleUrl,
+      (candidate) =>
+        candidate === repositoryEnvironmentPath ||
+        candidate === workspaceEnvironmentPath,
+    );
+
+    assert.equal(environmentPath, repositoryEnvironmentPath);
   });
 });

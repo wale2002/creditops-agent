@@ -5,6 +5,7 @@ import {
 import type { AgentMessage, AgentModel } from "./agent-model.js";
 import {
   AuditedToolExecutor,
+  type AgentToolName,
   type AuditEvent,
   type ToolExecutionContext,
 } from "./tool-executor.js";
@@ -32,6 +33,7 @@ export interface RunCreditAgentOptions {
   context: ToolExecutionContext;
   userRequest: string;
   maxModelTurns?: number;
+  requiredSuccessfulTools?: readonly AgentToolName[];
 }
 
 export interface CreditAgentRunResult {
@@ -99,6 +101,10 @@ export async function runCreditAgent(
   ];
 
   const seenToolCallIds = new Set<string>();
+  const successfulTools = new Set<AgentToolName>();
+  const requiredSuccessfulTools = [
+    ...new Set(options.requiredSuccessfulTools ?? []),
+  ];
 
   for (let turn = 1; turn <= maxModelTurns; turn += 1) {
     const response = await options.model.respond({
@@ -110,6 +116,25 @@ export async function runCreditAgent(
     if (response.kind === "final") {
       if (response.text.trim().length === 0) {
         throw new AgentProtocolError("Model returned an empty final response");
+      }
+
+      const missingTools = requiredSuccessfulTools.filter(
+        (toolName) => !successfulTools.has(toolName),
+      );
+
+      if (missingTools.length > 0) {
+        messages.push({
+          role: "assistant",
+          text: response.text,
+          toolCalls: [],
+        });
+        messages.push({
+          role: "user",
+          text:
+            "The draft is incomplete. Before returning a final answer, " +
+            `successfully call these required tools: ${missingTools.join(", ")}.`,
+        });
+        continue;
       }
 
       return {
@@ -159,6 +184,7 @@ export async function runCreditAgent(
           toolCall.input,
           options.context,
         );
+        successfulTools.add(toolCall.name);
 
         messages.push({
           role: "tool",
