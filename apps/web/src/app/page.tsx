@@ -4,6 +4,7 @@ import {
   borrowerOptions,
   getRelationshipReview,
 } from "@/lib/review-data";
+import { PolicyAssistant } from "./policy-assistant";
 
 const money = new Intl.NumberFormat("en-NG", {
   style: "currency",
@@ -226,6 +227,8 @@ export default async function Home({
               </article>
             ))}
           </div>
+
+          <PolicyAssistant />
 
           <div className="grid gap-6 xl:grid-cols-[1.15fr_.85fr]">
             <article className="rounded-2xl border border-[#dce6e3] bg-white shadow-[0_10px_26px_rgba(24,55,48,0.045)]">

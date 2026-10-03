@@ -6,7 +6,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tsx --test test/policy-search.test.ts test/credit-tools.test.ts test/tool-executor.test.ts test/relationship-review.test.ts test/agent-loop.test.ts test/bedrock-agent-model.test.ts test/bedrock-demo.test.ts",
+    "test": "tsx --test test/policy-search.test.ts test/policy-assistant.test.ts test/credit-tools.test.ts test/tool-executor.test.ts test/relationship-review.test.ts test/agent-loop.test.ts test/bedrock-agent-model.test.ts test/bedrock-demo.test.ts",
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "demo:bedrock": "tsx src/bedrock-demo.ts"

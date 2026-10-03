@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import {
   AuditedToolExecutor,
+  answerPolicyQuestion,
   chunkPolicyDocument,
   orchestrateRelationshipReview,
 } from "@creditops/agent-tools";
@@ -49,4 +50,8 @@ export function getRelationshipReview(borrowerId: string) {
     review,
     auditEvents: executor.getAuditEvents(),
   };
+}
+
+export function getPolicyAnswer(question: string) {
+  return answerPolicyQuestion(question, policyChunks);
 }
