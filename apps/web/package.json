@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node ../../node_modules/typescript/bin/tsc -p ../../packages/domain/tsconfig.json && node ../../node_modules/typescript/bin/tsc -p ../../packages/agent-tools/tsconfig.json && next build",
     "start": "next start",
     "lint": "eslint"
   },
