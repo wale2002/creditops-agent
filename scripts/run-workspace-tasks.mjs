@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process";
 
 const taskGroups = {
   test: [
+    ["run", "build", "--workspace", "@creditops/domain"],
+    ["run", "build", "--workspace", "@creditops/agent-tools"],
     ["run", "test", "--workspace", "@creditops/domain"],
     ["run", "test", "--workspace", "@creditops/agent-tools"],
     ["run", "test", "--workspace", "@creditops/mcp-server"],
