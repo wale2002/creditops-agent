@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 z" fill="#4b5563" />
+    </marker>
+    <style>
+      .title { font: 700 48px Arial, sans-serif; fill: #1f2937; }
+      .box-title { font: 700 26px Arial, sans-serif; fill: #17324d; }
+      .small { font: 600 23px Arial, sans-serif; fill: #1f2937; }
+      .caption { font: 500 21px Arial, sans-serif; fill: #4b5563; }
+      .flow { stroke: #4b5563; stroke-width: 5; fill: none; marker-end: url(#arrow); }
+      .connector { stroke: #4b5563; stroke-width: 5; fill: none; }
+      .main-box { fill: #eaf3fb; stroke: #2f6f9f; stroke-width: 3; rx: 12; }
+      .tool-box { fill: #ffffff; stroke: #7b9bb5; stroke-width: 3; rx: 10; }
+      .cloud-box { fill: #fff8e8; stroke: #c48a20; stroke-width: 3; rx: 12; }
+      .guard-box { fill: #edf7f1; stroke: #37835d; stroke-width: 3; rx: 12; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#ffffff" />
+  <text x="800" y="75" text-anchor="middle" class="title">CreditOps Architecture</text>
+
+  <rect x="65" y="155" width="250" height="120" class="main-box" />
+  <text x="190" y="225" text-anchor="middle" class="box-title">Credit Analyst</text>
+
+  <rect x="380" y="155" width="250" height="120" class="main-box" />
+  <text x="505" y="205" text-anchor="middle" class="box-title">Web Application</text>
+  <text x="505" y="242" text-anchor="middle" class="caption">Next.js + React</text>
+
+  <rect x="695" y="155" width="250" height="120" class="main-box" />
+  <text x="820" y="205" text-anchor="middle" class="box-title">Agent Workflow</text>
+  <text x="820" y="242" text-anchor="middle" class="caption">TypeScript</text>
+
+  <rect x="1010" y="155" width="250" height="120" class="main-box" />
+  <text x="1135" y="225" text-anchor="middle" class="box-title">Credit Tools</text>
+
+  <rect x="1325" y="155" width="210" height="120" class="main-box" />
+  <text x="1430" y="205" text-anchor="middle" class="box-title">Draft Review</text>
+  <text x="1430" y="242" text-anchor="middle" class="caption">Human decides</text>
+
+  <path d="M315 215 H365" class="flow" />
+  <path d="M630 215 H680" class="flow" />
+  <path d="M945 215 H995" class="flow" />
+  <path d="M1260 215 H1310" class="flow" />
+
+  <text x="800" y="340" text-anchor="middle" class="box-title">Controlled Credit Tools</text>
+
+  <rect x="95" y="410" width="310" height="105" class="tool-box" />
+  <text x="250" y="475" text-anchor="middle" class="small">Financial Calculations</text>
+
+  <rect x="460" y="410" width="310" height="105" class="tool-box" />
+  <text x="615" y="475" text-anchor="middle" class="small">Covenant Testing</text>
+
+  <rect x="825" y="410" width="310" height="105" class="tool-box" />
+  <text x="980" y="475" text-anchor="middle" class="small">Policy RAG</text>
+
+  <rect x="1190" y="410" width="310" height="105" class="tool-box" />
+  <text x="1345" y="475" text-anchor="middle" class="small">MCP-ready Tools</text>
+
+  <path d="M250 410 V370 H1345 V410" class="connector" />
+  <path d="M615 410 V370" class="connector" />
+  <path d="M980 410 V370" class="connector" />
+  <path d="M1135 370 V290" class="flow" />
+
+  <rect x="120" y="595" width="610" height="105" class="cloud-box" />
+  <text x="425" y="638" text-anchor="middle" class="box-title">AWS Cloud</text>
+  <text x="425" y="677" text-anchor="middle" class="caption">CDK • Lambda • S3 • CloudWatch • Optional Bedrock</text>
+
+  <rect x="870" y="595" width="610" height="105" class="guard-box" />
+  <text x="1175" y="638" text-anchor="middle" class="box-title">Security and Governance</text>
+  <text x="1175" y="677" text-anchor="middle" class="caption">RBAC • Audit Trail • Human Approval</text>
+
+  <path d="M730 648 H855" class="flow" />
+
+  <rect x="120" y="760" width="1360" height="75" class="guard-box" />
+  <text x="800" y="807" text-anchor="middle" class="small">GitHub Actions • Automated Tests • Vercel Deployment • Synthetic Data</text>
+</svg>
