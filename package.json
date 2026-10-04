@@ -7,6 +7,7 @@
     "test": "node scripts/run-workspace-tasks.mjs test",
     "eval:policy": "node scripts/run-workspace-tasks.mjs eval:policy",
     "build": "node scripts/run-workspace-tasks.mjs build",
+    "synth:infra": "node scripts/run-workspace-tasks.mjs synth:infra",
     "lint": "node scripts/run-workspace-tasks.mjs lint",
     "ci": "node scripts/run-workspace-tasks.mjs ci"
   },
@@ -20,7 +21,8 @@
   },
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "infra"
   ],
   "devDependencies": {
     "@types/node": "^26.6.3",

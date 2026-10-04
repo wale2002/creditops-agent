@@ -5,6 +5,7 @@ const taskGroups = {
     ["run", "test", "--workspace", "@creditops/domain"],
     ["run", "test", "--workspace", "@creditops/agent-tools"],
     ["run", "test", "--workspace", "@creditops/mcp-server"],
+    ["run", "test", "--workspace", "@creditops/infra"],
   ],
   "eval:policy": [
     ["run", "eval:policy", "--workspace", "@creditops/agent-tools"],
@@ -13,7 +14,11 @@ const taskGroups = {
     ["run", "build", "--workspace", "@creditops/domain"],
     ["run", "build", "--workspace", "@creditops/agent-tools"],
     ["run", "build", "--workspace", "@creditops/mcp-server"],
+    ["run", "build", "--workspace", "@creditops/infra"],
     ["run", "build", "--workspace", "web"],
+  ],
+  "synth:infra": [
+    ["run", "synth", "--workspace", "@creditops/infra"],
   ],
   lint: [["run", "lint", "--workspace", "web"]],
 };
@@ -22,6 +27,7 @@ taskGroups.ci = [
   ...taskGroups.test,
   ...taskGroups["eval:policy"],
   ...taskGroups.build,
+  ...taskGroups["synth:infra"],
   ...taskGroups.lint,
 ];
 

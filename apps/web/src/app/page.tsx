@@ -2,10 +2,12 @@ import Link from "next/link";
 
 import {
   borrowerOptions,
+  getLocalReviewerIdentity,
   getPolicyEvaluation,
   getRelationshipReview,
 } from "@/lib/review-data";
 import { PolicyAssistant } from "./policy-assistant";
+import { ReviewDecisionPanel } from "./review-decision-panel";
 
 const money = new Intl.NumberFormat("en-NG", {
   style: "currency",
@@ -15,11 +17,19 @@ const money = new Intl.NumberFormat("en-NG", {
 });
 
 function statusTone(status: string): string {
-  if (status === "BREACH" || status === "ELEVATED") {
+  if (
+    status === "BREACH" ||
+    status === "ELEVATED" ||
+    status === "REJECTED"
+  ) {
     return "bg-[#fff0e8] text-[#a94116] ring-[#f2c2ad]";
   }
 
-  if (status === "PASS" || status === "STABLE") {
+  if (
+    status === "PASS" ||
+    status === "STABLE" ||
+    status === "APPROVED"
+  ) {
     return "bg-[#e5f6ef] text-[#176b57] ring-[#b7dfd3]";
   }
 
@@ -59,7 +69,9 @@ export default async function Home({
   )
     ? query.borrower!
     : borrowerOptions[0]!.id;
-  const { review, auditEvents } = getRelationshipReview(selectedBorrower);
+  const { review, auditEvents, approval } =
+    getRelationshipReview(selectedBorrower);
+  const reviewer = getLocalReviewerIdentity();
   const policyEvaluation = getPolicyEvaluation();
   const borrower = borrowerOptions.find(
     (option) => option.id === selectedBorrower,
@@ -191,7 +203,7 @@ export default async function Home({
                   {borrower.riskStatus} RISK
                 </span>
                 <span className="rounded-full bg-[#eef3f6] px-2.5 py-1 text-[11px] font-semibold text-[#53666f] ring-1 ring-[#d5e0e5]">
-                  AWAITING HUMAN REVIEW
+                  {approval.status.replaceAll("_", " ")}
                 </span>
               </div>
               <h1 className="text-3xl font-semibold tracking-[-0.04em] text-[#14211f] md:text-4xl">
@@ -391,13 +403,20 @@ export default async function Home({
             </article>
           </div>
 
+          <ReviewDecisionPanel
+            key={`${selectedBorrower}-${approval.version}`}
+            borrowerId={selectedBorrower}
+            initialApproval={approval}
+            reviewer={reviewer}
+          />
+
           <footer className="flex flex-col justify-between gap-3 rounded-2xl bg-[#15352f] px-5 py-4 text-white sm:flex-row sm:items-center">
             <div>
               <p className="text-sm font-semibold">Human decision boundary enforced</p>
               <p className="mt-1 text-xs text-[#b8d1cb]">CreditOps can prepare evidence. Only an authorized credit officer can decide.</p>
             </div>
             <span className="whitespace-nowrap rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-[#d5eee8] ring-1 ring-white/15">
-              finalDecision: null
+              finalDecision: {approval.finalDecision?.decision ?? "null"}
             </span>
           </footer>
         </section>

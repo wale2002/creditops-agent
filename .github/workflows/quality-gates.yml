@@ -46,5 +46,8 @@ jobs:
       - name: Build all workspaces
         run: npm run build
 
+      - name: Synthesize AWS infrastructure without deployment
+        run: npm run synth:infra
+
       - name: Lint web application
         run: npm run lint

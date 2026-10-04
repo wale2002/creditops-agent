@@ -1,0 +1,16 @@
+{
+  "name": "@creditops/infra",
+  "version": "1.0.0",
+  "description": "Locally testable AWS CDK infrastructure for CreditOps",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "synth": "tsx bin/creditops.ts",
+    "test": "tsx --test test/creditops-stack.test.ts"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.272.0",
+    "constructs": "^10.8.1"
+  }
+}

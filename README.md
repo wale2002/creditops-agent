@@ -4,7 +4,7 @@
 
 CreditOps is an evidence-first commercial credit review prototype. It combines deterministic financial calculations, policy retrieval with citations, permission-controlled agent tools, audit events, and explicit human approval boundaries in one portfolio project.
 
-> **Demonstration only:** every borrower, financial record, covenant, and policy in this repository is synthetic. CreditOps does not make lending decisions or approve credit.
+> **Demonstration only:** every borrower, financial record, covenant, policy, and recorded decision in this repository is synthetic. CreditOps does not make real lending decisions or approve real credit.
 
 ![CreditOps relationship review dashboard](docs/images/creditops-dashboard.png)
 
@@ -14,10 +14,11 @@ CreditOps is an evidence-first commercial credit review prototype. It combines d
 - **Grounded policy Q&A:** an offline RAG assistant retrieves policy sections, returns supporting citations, and safely refuses unrelated questions.
 - **Agentic workflows:** a guarded tool loop can retrieve borrower data, run calculations, test covenants, check documents, and search policy evidence.
 - **Security controls:** role-based permissions are enforced at the tool-execution boundary and every attempted tool call produces an audit event.
-- **Human-in-the-loop design:** the system may draft findings, but no tool exists for an AI model to approve credit, waive a covenant, or make a final lending decision.
+- **Human-in-the-loop design:** the system may draft findings, while a separate state machine permits only an authorized credit-officer identity to approve or reject a review with a rationale.
 - **Evaluation-driven development:** a labelled RAG benchmark is enforced locally and in GitHub Actions alongside tests, builds, and linting.
 - **Optional cloud model integration:** an Amazon Bedrock adapter supports Nova Lite through a cost-safe runner that is dry-run by default.
 - **Standardized tool integration:** a local Model Context Protocol server exposes five read-only banking tools with schemas, RBAC, and linked audit events.
+- **Infrastructure as code:** an AWS CDK stack synthesizes a least-privilege serverless boundary locally, with no deployment or AWS request.
 
 ## Architecture
 
@@ -42,7 +43,9 @@ flowchart LR
 
     Orchestrator --> Draft[Evidence-backed draft review]
     AgentLoop --> Draft
-    Draft --> Human[Human review and approval]
+    Draft --> Human[Human review checkpoint]
+    Human --> DecisionService[Approval state machine]
+    DecisionService --> DecisionLog[(Tamper-evident local event log)]
 ```
 
 The local web experience is fully offline after installation and sends no AWS requests. The Bedrock path is a separate, optional adapter for demonstrating model-directed tool use. Both paths rely on the same deterministic tools and policy evidence.
@@ -88,9 +91,12 @@ CreditOps applies controls in code, not only in prompts:
 - Required-tool rules prevent a model from skipping evidence collection.
 - Tool calls record success, denial, or error events for traceability.
 - Returned records are cloned so callers cannot mutate source fixtures.
-- The final output is labelled as a draft awaiting human review.
+- Only the `CREDIT_OFFICER` role can submit a final decision; banker, system, and AI roles are rejected in code.
+- Final decisions require a rationale and cannot be overwritten for the same evidence digest.
+- Optimistic version checks reject stale concurrent submissions.
+- Decision events are hash-chained and revalidated when read so local tampering is detected.
 
-The current audit store is an append-only in-memory demonstration. A production design would persist signed events to durable storage with retention, identity, and access policies.
+Tool-execution audit events remain an in-memory demonstration. Human decisions are persisted locally as an append-only, hash-chained JSONL event log under the ignored `.creditops-data` directory. This is intentionally a single-process portfolio adapter; production would use authenticated identities and durable transactional storage with retention and access policies.
 
 ## Repository structure
 
@@ -99,10 +105,13 @@ apps/web/                    Next.js dashboard and API routes
 packages/domain/             Financial models, calculations, covenants, fixtures
 packages/agent-tools/        RAG, tools, RBAC, audit, orchestration, agent loop
 packages/mcp-server/         Read-only MCP tools and stdio transport
+infra/                       AWS CDK stack, Lambda boundary, assertions
 docs/policies/               Synthetic commercial credit policy corpus
 docs/rag-evaluation.md       Evaluation methodology and metrics
 docs/bedrock-local-demo.md   Optional Bedrock setup and cost-safety guide
 docs/mcp-server.md           MCP tools, security model, and client configuration
+docs/aws-infrastructure.md   CDK architecture, controls, and cost boundary
+docs/human-approval.md       Approval state machine, API, and security boundary
 .github/workflows/           Automated quality gates
 ```
 
@@ -140,7 +149,15 @@ Or run the same combined gate used by CI:
 npm run ci
 ```
 
-The current suite contains 46 automated tests across domain calculations, covenant handling, policy retrieval, safe refusals, evaluation metrics, credit tools, permissions, audit events, orchestration, the agent loop, the Bedrock adapter, and the MCP boundary.
+The current suite contains 60 automated tests across domain calculations, covenant handling, policy retrieval, safe refusals, evaluation metrics, credit tools, permissions, human approvals, audit integrity, orchestration, the agent loop, the Bedrock adapter, the MCP boundary, and synthesized infrastructure controls.
+
+## Human approval workflow
+
+The dashboard includes an explicit credit-officer checkpoint. A reviewer must provide a rationale before approving or rejecting a review. The server—not the browser—supplies the local demo identity, and the workflow independently enforces the `CREDIT_OFFICER` role.
+
+Each decision is tied to a SHA-256 digest of the evidence-backed draft, protected by an expected-version check, and appended to a hash-chained local event log. Once a review digest has a final decision, it cannot be overwritten. See the [human approval guide](docs/human-approval.md).
+
+The built-in identity is clearly marked `LOCAL_DEMO`. It is enabled by default only during local development. Production mode rejects demo approvals unless `CREDITOPS_ALLOW_DEMO_APPROVALS=true` is deliberately set; a real deployment should replace the adapter with authenticated workforce identity.
 
 ## Local MCP server
 
@@ -152,6 +169,17 @@ npm run start --workspace @creditops/mcp-server
 ```
 
 The server runs locally, reads synthetic data, and makes no AWS request. See the [MCP server guide](docs/mcp-server.md) for its tools, client configuration, identity boundary, and audit behaviour.
+
+## AWS infrastructure without deployment
+
+The CDK package defines a private S3 policy bucket, bounded Node.js Lambda, throttled HTTP API, retained CloudWatch logs, alarms, and an operations dashboard. Bedrock invocation permission is absent by default.
+
+```bash
+npm run test --workspace @creditops/infra
+npm run synth:infra
+```
+
+Synthesis creates a local CloudFormation template under `cdk.out` and does not create AWS resources. CreditOps intentionally provides no deployment script. See the [AWS infrastructure guide](docs/aws-infrastructure.md).
 
 ## Optional Amazon Bedrock demo
 
@@ -170,7 +198,7 @@ Never commit AWS keys. Use temporary credentials or an AWS profile through the S
 
 A concise way to explain the project:
 
-> I separated probabilistic AI from deterministic credit logic. The model can decide which approved tools to call and draft an evidence-backed review, but financial ratios, covenant tests, permissions, citations, and approval boundaries are enforced in code. I then added a labelled retrieval benchmark and CI quality gate so grounding quality is measured rather than assumed.
+> I separated probabilistic AI from deterministic credit logic. The model can select approved tools and draft an evidence-backed review, but calculations, covenant tests, permissions, citations, and final decisions are enforced in code. A credit-officer-only state machine records rationale, rejects stale writes, prevents overwrites, and creates a tamper-evident event chain. A labelled retrieval benchmark and CI gate ensure grounding quality is measured rather than assumed.
 
 This design is intentionally aligned with regulated financial software: explainable calculations, controlled data access, traceable actions, evidence-backed outputs, and human accountability.
 
@@ -178,7 +206,7 @@ This design is intentionally aligned with regulated financial software: explaina
 
 - Replace synthetic fixtures with a repository interface backed by a database.
 - Add embedding-based hybrid retrieval and compare it against the lexical baseline.
-- Persist audit events in tamper-evident durable storage.
+- Move tool audit events and the local decision log to transactional durable storage.
 - Add identity-provider integration and fine-grained borrower entitlements.
 - Add model and retrieval observability, latency, and cost dashboards.
 - Expand the evaluation set with adversarial, ambiguous, and multi-policy questions.
